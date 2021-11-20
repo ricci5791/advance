@@ -1,0 +1,14 @@
+version: "3.3"
+
+services:
+  pyspark:
+    build:
+      context: .
+    restart: always
+    volumes:
+      - datasets:/src/datasets
+    ports:
+      - 4040:4040
+
+volumes:
+  datasets:
