@@ -71,13 +71,13 @@ class YelpReader:
         #
         self.reviews_df = review_df
 
-        # self.user_df = (self.spark
-        #                 .read
-        #                 .json(file_paths.user_dataset)
-        #                 .select('user_id', 'name', 'friends')
-        #                 .withColumn('friends',
-        #                             f.split(f.col('friends'), ', '))
-        #                 )
+        self.user_df = (self.spark
+                        .read
+                        .json(file_paths.user_dataset)
+                        .select('user_id', 'name', 'friends')
+                        .withColumn('friends',
+                                    f.split(f.col('friends'), ', '))
+                        )
 
     def _save_to_csv(self, df, file_path):
         """Internal function for saving dataframes to csv files"""

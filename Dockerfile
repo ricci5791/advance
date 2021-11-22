@@ -4,6 +4,8 @@ FROM datamechanics/spark:3.2.0-latest
 
 RUN pip install pyspark==3.2.0
 
-COPY . .
+COPY datasets/ datasets/
+
+COPY /src .
 
 CMD ["python", "main.py"]
