@@ -1,6 +1,7 @@
 """Module with YELP task implementation"""
 import os
 
+import pyspark.sql
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as f
 from pyspark.sql import types as t
@@ -79,7 +80,7 @@ class YelpReader:
                                     f.split(f.col('friends'), ', '))
                         )
 
-    def _save_to_csv(self, df, file_path):
+    def save_to_csv(self, df: pyspark.sql.DataFrame, file_path):
         """Internal function for saving dataframes to csv files"""
         (df
          .coalesce(1)
@@ -191,11 +192,11 @@ class YelpReader:
                            )
 
         gas_stations_food_df = (gas_stations_df
-                                .withColumn('has_store', f.array_contains(f.col('categories'), 'Convenience Stores'))
+                                .withColumn('has_store',
+                                            f.array_contains(f.col('categories'), 'Convenience Stores').cast('string'))
                                 .withColumn('has_cafe', cafe_condition)
+                                .withColumn('categories', f.col('categories').cast('string'))
                                 )
-
-        gas_stations_food_df = gas_stations_food_df.filter(f.col('has_cafe') | f.col('has_store'))
 
         return gas_stations_food_df
 
@@ -257,8 +258,8 @@ class YelpReader:
 
         intersected_friends_df = (business_visited_friends_df
                                   .withColumn('friends_attendees',
-                                              f.array_intersect(f.col('visited_by'), f.col('friends')))
-                                  .filter(f.size(f.col('friends_attendees')) >= 1)
+                                              f.array_intersect(f.col('visited_by'), f.col('friends'))
+                                              .astype("string"))
                                   .select('business_id', 'user_id', 'name', 'friends_attendees'))
 
         return intersected_friends_df

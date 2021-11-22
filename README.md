@@ -18,3 +18,8 @@ Main task that is performed by the Spark here is to calculate various data insig
 
 In order to get full utilization of computing power it is reccomended to download yelp dataset, place it in dataset folder and start container with 
 `docker-compose up --build` command
+
+---
+
+To see results of calculation go to "0.0.0.0:9001", sign in with credentials that are 
+in docker-compose.yml environment and go to `testbucket` bucket. (Keep attention that credentials are quoted)

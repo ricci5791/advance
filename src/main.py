@@ -1,18 +1,48 @@
 """Module with show of implemented functionality for YELP problem"""
+import os
+import re
+
+from minio import Minio
 
 from yelp_reader import YelpReader
 
 if __name__ == '__main__':
+    results = []
+
     yelp_reader = YelpReader()
 
-    yelp_reader.get_business_all_day_opened().show()
+    results.append(yelp_reader.get_business_all_day_opened())
 
-    yelp_reader.get_wifi_business_df().show()
+    results.append(yelp_reader.get_wifi_business_df())
 
-    yelp_reader.get_business_with_parking_df().show()
+    results.append(yelp_reader.get_business_with_parking_df())
 
-    yelp_reader.get_station_with_cafe_shop_df().show()
+    results.append(yelp_reader.get_station_with_cafe_shop_df())
 
-    # yelp_reader.get_checkin_per_business_df().show()
+    results.append(yelp_reader.get_user_friends_df())
 
-    yelp_reader.get_user_friends_df().show()
+    client = Minio('s3:9000/',
+                   '"access_key"',
+                   '"secret_key"',
+                   secure=False, )
+
+    if not client.bucket_exists('testbucket'):
+        client.make_bucket('testbucket')
+
+    titles = ['24_hours_business', 'business_with_wifi', 'business_with_parking',
+              'gas_stations_with_food', 'user_friends_attendies']
+    file_names = []
+
+    root_dir = os.getcwd()
+    regex = re.compile('(.*csv$)')
+
+    for title, df in zip(titles, results):
+        yelp_reader.save_to_csv(df, title)
+
+    for root, dirs, files in os.walk(root_dir):
+        for file in files:
+            if regex.match(file):
+                file_names.append(root + "/" + file)
+
+    for title, file_name in zip(titles, file_names):
+        client.fput_object('testbucket', title, file_name)
